@@ -22,6 +22,14 @@ for i in "$@"; do
         HOST="${i#*=}"
         shift
         ;;
+    --ssh_host=*)
+        SSH_HOST="${i#*=}"
+        shift
+        ;;
+    --ssh_user=*)
+        SSH_USER="${i#*=}"
+        shift
+        ;;
     --environment=*)
         ENV="${i#*=}"
         shift
@@ -58,7 +66,7 @@ function trapint {
 }
 
 print_usage_and_exit () {
-    echo 'Usage: ./deploy.sh --clear_data=yes|no --host --environment --version --country_config_version --replicas'
+    echo 'Usage: ./deploy.sh --clear_data=yes|no --host --environment --ssh_host --ssh_user --version --country_config_version --replicas'
     echo "  --clear_data must have a value of 'yes' or 'no' set e.g. --clear_data=yes"
     echo "  --environment can be 'production' or 'development' or 'qa' or 'demo'"
     echo '  --host    is the server to deploy to'
@@ -88,6 +96,14 @@ if [ -z "$VERSION" ] ; then
     print_usage_and_exit
 fi
 
+if [ -z "$SSH_HOST" ] ; then
+    echo 'Error: Argument --ssh_host is required.'
+    print_usage_and_exit
+fi
+
+if [ -z "$SSH_USER" ] ; then
+    echo 'Error: Argument --ssh_user is required.'
+    print_usage_and_exit
 
 if [ -z "$COUNTRY_CONFIG_VERSION" ] ; then
     echo 'Error: Argument --country_config_version is required.'
@@ -179,6 +195,30 @@ if [ -z "$CONTENT_SECURITY_POLICY_WILDCARD" ] ; then
     print_usage_and_exit
 fi
 
+if [ -z "$DOCKER_USERNAME" ] ; then
+    echo 'Error: Missing environment variable DOCKER_USERNAME.'
+    print_usage_and_exit
+fi
+
+if [ -z "$SSH_KEY" ] ; then
+    echo 'Error: Missing environment variable SSH_KEY.'
+    print_usage_and_exit
+fi
+
+if [ -z "$DOCKER_TOKEN" ] ; then
+    echo 'Error: Missing environment variable DOCKER_TOKEN.'
+    print_usage_and_exit
+fi
+
+if [ -z "$KNOWN_HOSTS" ] ; then
+    echo 'Error: Missing environment variable KNOWN_HOSTS.'
+    print_usage_and_exit
+fi
+
+if [ -z "$SUDO_PASSWORD" ] ; then
+    echo 'Info: Missing optional sudo password'
+fi
+
 if [ -z "$TOKENSEEDER_MOSIP_AUTH__PARTNER_MISP_LK" ] ; then
     echo 'Info: Missing optional MOSIP environment variable TOKENSEEDER_MOSIP_AUTH__PARTNER_MISP_LK.'
     TOKENSEEDER_MOSIP_AUTH__PARTNER_MISP_LK=''
@@ -246,10 +286,6 @@ if [ -z "$SENDER_EMAIL_ADDRESS" ] ; then
   echo 'Info: Missing optional return sender email address environment variable SENDER_EMAIL_ADDRESS'
 fi
 
-
-
-SSH_USER=${SSH_USER:-root}
-SSH_HOST=${SSH_HOST:-$HOST}
 LOG_LOCATION=${LOG_LOCATION:-/var/log}
 
 (cd /tmp/ && curl -O https://raw.githubusercontent.com/opencrvs/opencrvs-core/$VERSION/docker-compose.yml)
@@ -318,6 +354,13 @@ cp $BASEDIR/authorized_keys /tmp/opencrvs/infrastructure/authorized_keys
 # Copy metabase database
 cp $PARENT_DIR/src/api/dashboards/file/metabase.init.db.sql /tmp/opencrvs/infrastructure/metabase.init.db.sql
 
+echo -e "$SSH_KEY" > /tmp/private_key_tmp
+chmod 600 /tmp/private_key_tmp
+echo -e "$KNOWN_HOSTS" > /tmp/known_hosts
+chmod 600 /tmp/known_hosts
+# Read private ssh key from SSH_KEY environment variable, convert to a public key and append to /tmp/opencrvs/infrastructure/authorized_keys file
+echo $(ssh-keygen -y -f /tmp/private_key_tmp) >> /tmp/opencrvs/infrastructure/authorized_keys
+
 rotate_authorized_keys() {
   # file exists and has a size of more than 0 bytes
   if [ -s "/tmp/opencrvs/infrastructure/authorized_keys" ]; then
@@ -329,15 +372,18 @@ rotate_authorized_keys() {
 
 # Download base docker compose files to the server
 
-rsync -rP /tmp/docker-compose* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
+sudo rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP /tmp/docker-compose* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
 
-rsync -rP $BASEDIR/docker-compose* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
+sudo rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP $BASEDIR/docker-compose* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
 
 # Copy all country compose files to the server
-rsync -rP $BASEDIR/docker-compose.countryconfig* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
+sudo rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP $BASEDIR/docker-compose.countryconfig* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
 
 # Override configuration files with country specific files
-rsync -rP /tmp/opencrvs/infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs
+sudo rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP /tmp/opencrvs/infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs
+
+# IF USING SUDO PASSWORD, YOU MAY NEED TO ADJUST COMMANDS LIKE THIS:
+# ssh $SSH_USER@$SSH_HOST "echo $SUDO_PASSWORD | sudo -S 
 
 rotate_secrets() {
   files_to_rotate=$1
@@ -346,7 +392,7 @@ rotate_secrets() {
 }
 
 # Setup configuration files and compose file for the deployment domain
-ssh $SSH_USER@$SSH_HOST "SMTP_HOST=$SMTP_HOST SMTP_PORT=$SMTP_PORT SMTP_USERNAME=$SMTP_USERNAME SMTP_PASSWORD=$SMTP_PASSWORD ALERT_EMAIL=$ALERT_EMAIL MINIO_ROOT_USER=$MINIO_ROOT_USER MINIO_ROOT_PASSWORD=$MINIO_ROOT_PASSWORD /opt/opencrvs/infrastructure/setup-deploy-config.sh $HOST | tee -a $LOG_LOCATION/setup-deploy-config.log"
+ssh $SSH_USER@$SSH_HOST "SSH_USER=$SSH_USER SMTP_HOST=$SMTP_HOST SMTP_PORT=$SMTP_PORT SMTP_USERNAME=$SMTP_USERNAME SMTP_PASSWORD=$SMTP_PASSWORD ALERT_EMAIL=$ALERT_EMAIL MINIO_ROOT_USER=$MINIO_ROOT_USER MINIO_ROOT_PASSWORD=$MINIO_ROOT_PASSWORD /opt/opencrvs/infrastructure/setup-deploy-config.sh $HOST | tee -a $LOG_LOCATION/setup-deploy-config.log"
 
 # Takes in a space separated string of docker-compose.yml files
 # returns a new line separated list of images defined in those files
@@ -547,3 +593,12 @@ if [ $CLEAR_DATA == "yes" ] ; then
         ELASTICSEARCH_ADMIN_PASSWORD=$ELASTICSEARCH_SUPERUSER_PASSWORD \
         /opt/opencrvs/infrastructure/run-migrations.sh"
 fi
+
+echo "Setting up Kibana config & alerts"
+
+while true; do
+  if ssh $SSH_USER@$SSH_HOST "ELASTICSEARCH_SUPERUSER_PASSWORD=$ELASTICSEARCH_SUPERUSER_PASSWORD HOST=kibana$HOST /opt/opencrvs/infrastructure/monitoring/kibana/setup-config.sh"; then
+    break
+  fi
+sleep 5
+done

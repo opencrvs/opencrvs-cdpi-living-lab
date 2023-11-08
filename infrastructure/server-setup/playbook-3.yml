@@ -386,6 +386,37 @@
       copy:
         src: ../logrotate.conf
         dest: /etc/
+    
+    - name: Give read and write permissions to logrotate.conf because we replace it on each deploy
+      file:
+        path: /etc/logrotate.conf
+        owner: '{{ ansible_user }}'
+        group: '{{ ansible_user }}'
+        mode: 'u+rwX,g+rwX,o-rwx'
+    
+    - name: Create deploy logfile
+      ansible.builtin.file:
+        path: /var/log/setup-deploy-config.log
+        owner: '{{ ansible_user }}'
+        group: '{{ ansible_user }}'
+        state: touch
+        mode: 'u+rwX,g+rwX,o-rwx'
+    
+    - name: Create secret logfile
+      ansible.builtin.file:
+        path: /var/log/rotate-secrets.log
+        owner: '{{ ansible_user }}'
+        group: '{{ ansible_user }}'
+        state: touch
+        mode: 'u+rwX,g+rwX,o-rwx'
+    
+    - name: Create backup logfile
+      ansible.builtin.file:
+        path: /var/log/opencrvs-backup.log
+        owner: '{{ ansible_user }}'
+        group: '{{ ansible_user }}'
+        state: touch
+        mode: 'u+rwX,g+rwX,o-rwx'
 
     - name: 'Save system logs to Papertrail'
       register: papaertrailSystemLogs
@@ -412,6 +443,11 @@
         rule: allow
         port: 4789
         proto: udp
+    - name: Allow all access to tcp port 443
+      ufw:
+        rule: allow
+        port: '443'
+        proto: tcp
 
     - name: 'Deny everything else and enable UFW'
       ufw:

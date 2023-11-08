@@ -60,6 +60,23 @@ jobs:
           cd opencrvs-core
           git checkout ${{ github.event.inputs.core-image-tag }}
 
+      #
+      # Uncomment if using VPN
+      #
+      #- name: Install openconnect ppa
+      #  run: sudo add-apt-repository ppa:dwmw2/openconnect -y && sudo apt update
+      
+      #- name: Install openconnect
+      #  run: sudo apt install -y openconnect
+      
+      #- name: Connect to VPN
+      #  run: |
+      #    echo "${{ secrets.VPN_PWD }}" | sudo openconnect -u ${{ secrets.VPN_USER }} --passwd-on-stdin --protocol=${{ secrets.VPN_PROTOCOL }} ${{ secrets.VPN_HOST }}:${{ secrets.VPN_PORT }} --servercert ${{ secrets.VPN_SERVERCERT }} --background
+
+      #- name: Test if IP is reachable
+      #  run: |
+      #    ping -c4 ${{ secrets.SSH_HOST }}
+
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
@@ -70,7 +87,7 @@ jobs:
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          password: ${{ secrets.DOCKER_TOKEN }}
   
       - name: Wait for images to be available
         run: |
@@ -99,6 +116,8 @@ jobs:
           ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
           DOCKERHUB_ACCOUNT: ${{ secrets.DOCKERHUB_ACCOUNT }}
           DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_REPO }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
           KIBANA_USERNAME: ${{ secrets.KIBANA_USERNAME }}
           KIBANA_PASSWORD: ${{ secrets.KIBANA_PASSWORD }}
           MONGODB_ADMIN_USER: ${{ secrets.MONGODB_ADMIN_USER }}
@@ -113,10 +132,22 @@ jobs:
           INFOBIP_API_KEY: ${{ secrets.INFOBIP_API_KEY }}
           SENDER_EMAIL_ADDRESS: ${{ secrets.SENDER_EMAIL_ADDRESS }}
           SUPER_USER_PASSWORD: ${{ secrets.SUPER_USER_PASSWORD }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
           CONTENT_SECURITY_POLICY_WILDCARD: ${{ vars.CONTENT_SECURITY_POLICY_WILDCARD }}
+          # SUDO_PASSWORD: ${{ secrets.SUDO_PASSWORD }}
+          # ELASTALERT_SLACK_WEBHOOK: ${{ secrets.ELASTALERT_SLACK_WEBHOOK }}
         run: |
           cd ./${{ github.event.repository.name }}
-          yarn deploy --clear_data=${{ github.event.inputs.reset }} --environment=${{ github.event.inputs.environment }} --host=${{ env.DOMAIN }} --version=${{ github.event.inputs.core-image-tag }} --country_config_version=${{ github.event.inputs.countryconfig-image-tag }} --country_config_path=../${{ github.event.repository.name }} --replicas=${{ env.REPLICAS }}
+          yarn deploy \
+          --clear_data=${{ github.event.inputs.reset }} \
+          --environment=${{ github.event.inputs.environment }} \
+          --host=${{ env.DOMAIN }} \
+          --ssh_host=${{ secrets.SSH_HOST }} \
+          --ssh_user=${{ secrets.SSH_USER }} \
+          --version=${{ github.event.inputs.core-image-tag }} \
+          --country_config_version=${{ github.event.inputs.countryconfig-image-tag }} \
+          --replicas=${{ env.REPLICAS }}
   seed-data:
     needs: deploy
     if: ${{ github.event.inputs.reset == 'yes' && needs.deploy.outputs.outcome == 'success' }}
