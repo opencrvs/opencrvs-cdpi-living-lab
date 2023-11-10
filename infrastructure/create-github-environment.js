@@ -3,11 +3,11 @@ const { Octokit } = require('@octokit/core')
 const { writeFileSync } = require('fs')
 
 const config = {
-  environment: '',
+  environment: 'production',
   repo: {
-    REPOSITORY_ID: '',
-    DOCKERHUB_ACCOUNT: '', // This may be a dockerhub organisation or the same as the username
-    DOCKERHUB_REPO: '',
+    REPOSITORY_ID: 'opencrvs/opencrvs-cdpi-living-lab',
+    DOCKERHUB_ACCOUNT: 'opencrvs', // This may be a dockerhub organisation or the same as the username
+    DOCKERHUB_REPO: 'ocrvs-cdpi-living-lab',
     DOCKER_USERNAME: process.env.DOCKER_USERNAME,
     DOCKER_TOKEN: process.env.DOCKER_TOKEN
   },
@@ -19,9 +19,9 @@ const config = {
     SSH_KEY: process.env.SSH_KEY // id_rsa
   },
   infrastructure: {
-    DISK_SPACE: '',
-    HOSTNAME: '', // server machine hostname used when provisioning - TODO: Adapt to support 3 or 5 replicas
-    DOMAIN: '', // web hostname applied after all public subdomains in Traefik,
+    DISK_SPACE: '100GB',
+    HOSTNAME: 'ip-10-20-0-86', // server machine hostname used when provisioning - TODO: Adapt to support 3 or 5 replicas
+    DOMAIN: 'opencrvs.labs.cdpi.dev', // web hostname applied after all public subdomains in Traefik,
     REPLICAS: '1' // TODO: Adapt to support 3 or 5 replicas
   },
   services: {
@@ -120,15 +120,6 @@ async function createSecret(environment, key, keyId, name, secret) {
 }
 
 async function getPublicKey(environment) {
-  await octokit.request(
-    `PUT /repos/${config.repo.DOCKERHUB_ACCOUNT}/${config.repo.DOCKERHUB_REPO}/environments/${environment}`,
-    {
-      headers: {
-        'X-GitHub-Api-Version': '2022-11-28'
-      }
-    }
-  )
-
   const res = await octokit.request(
     `GET /repositories/${config.repo.REPOSITORY_ID}/environments/${environment}/secrets/public-key`,
     {
