@@ -116,30 +116,30 @@ if [ -z "$REPLICAS" ] ; then
     print_usage_and_exit
 fi
 
-if [ -z "$SMTP_HOST" ] ; then
-    echo 'Error: Missing environment variable SMTP_HOST.'
-    print_usage_and_exit
-fi
+# if [ -z "$SMTP_HOST" ] ; then
+#     echo 'Error: Missing environment variable SMTP_HOST.'
+#     print_usage_and_exit
+# fi
 
-if [ -z "$SMTP_PORT" ] ; then
-    echo 'Error: Missing environment variable SMTP_PORT.'
-    print_usage_and_exit
-fi
+# if [ -z "$SMTP_PORT" ] ; then
+#     echo 'Error: Missing environment variable SMTP_PORT.'
+#     print_usage_and_exit
+# fi
 
-if [ -z "$SMTP_USERNAME" ] ; then
-    echo 'Error: Missing environment variable SMTP_USERNAME.'
-    print_usage_and_exit
-fi
+# if [ -z "$SMTP_USERNAME" ] ; then
+#     echo 'Error: Missing environment variable SMTP_USERNAME.'
+#     print_usage_and_exit
+# fi
 
-if [ -z "$SMTP_PASSWORD" ] ; then
-    echo 'Error: Missing environment variable SMTP_PASSWORD.'
-    print_usage_and_exit
-fi
+# if [ -z "$SMTP_PASSWORD" ] ; then
+#     echo 'Error: Missing environment variable SMTP_PASSWORD.'
+#     print_usage_and_exit
+# fi
 
-if [ -z "$ALERT_EMAIL" ] ; then
-    echo 'Error: Missing environment variable ALERT_EMAIL.'
-    print_usage_and_exit
-fi
+# if [ -z "$ALERT_EMAIL" ] ; then
+#     echo 'Error: Missing environment variable ALERT_EMAIL.'
+#     print_usage_and_exit
+# fi
 
 if [ -z "$KIBANA_USERNAME" ] ; then
     echo 'Error: Missing environment variable KIBANA_USERNAME.'
