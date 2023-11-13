@@ -104,6 +104,7 @@ fi
 if [ -z "$SSH_USER" ] ; then
     echo 'Error: Argument --ssh_user is required.'
     print_usage_and_exit
+fi
 
 if [ -z "$COUNTRY_CONFIG_VERSION" ] ; then
     echo 'Error: Argument --country_config_version is required.'
