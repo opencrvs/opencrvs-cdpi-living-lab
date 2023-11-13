@@ -1,0 +1,28 @@
+version: '3.3'
+
+services:
+  dci-crvs-api:
+    image: opencrvs/dci-crvs-api:7409b3d
+    environment:
+      - OPENCRVS_AUTH_URL=http://auth:4040
+      - OPENCRVS_GATEWAY_URL=http://gateway:7070/graphql
+    deploy:
+      labels:
+        - 'traefik.enable=true'
+        - 'traefik.http.routers.dci.rule=Host(`dci.farajaland-staging.opencrvs.org`)'
+        - 'traefik.http.services.dci.loadbalancer.server.port=1660'
+        - 'traefik.http.routers.dci.tls=true'
+        - 'traefik.http.routers.dci.tls.certresolver=certResolver'
+        - 'traefik.http.routers.dci.entrypoints=web,websecure'
+        - 'traefik.docker.network=opencrvs_overlay_net'
+        - 'traefik.http.middlewares.traefik.headers.stsseconds=31536000'
+        - 'traefik.http.middlewares.traefik.headers.stsincludesubdomains=true'
+        - 'traefik.http.middlewares.traefik.headers.stspreload=true'
+      replicas: 1
+    networks:
+      - overlay_net
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://127.0.0.1:12201'
+        tag: 'dci'
