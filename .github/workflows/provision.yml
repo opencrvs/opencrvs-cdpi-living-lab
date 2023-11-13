@@ -42,14 +42,14 @@ jobs:
               echo "ENV_TYPE=qa" >> "$GITHUB_ENV"
           fi
 
-      - name: Setup PEM file for backup server
+      - name: Setup PEM file
         # Secret didn't work directly in the if condition
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
         if: ${{ env.SSH_KEY }}
         run: |
-          echo "${{ secrets.SSH_KEY }}" > /tmp/backup.pem
-          chmod 600 /tmp/backup.pem
+          echo "${{ secrets.SSH_KEY }}" > /tmp/server.pem
+          chmod 600 /tmp/server.pem
 
       #
       # Uncomment if using VPN
