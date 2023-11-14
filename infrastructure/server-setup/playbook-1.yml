@@ -15,10 +15,13 @@
   become: yes
   become_method: sudo
   tasks:
-    - name: 'Create app directory'
-      file:
-        path: /opt/opencrvs
-        state: directory
+    - include_tasks:
+        file: tasks/app-group.yml
+        apply:
+          tags:
+            - app
+      tags:
+        - app
 
     - name: 'Check mandatory variables are defined'
       assert:

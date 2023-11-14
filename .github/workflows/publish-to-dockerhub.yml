@@ -14,6 +14,7 @@ on:
         required: true
 jobs:
   push:
+    environment: production
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

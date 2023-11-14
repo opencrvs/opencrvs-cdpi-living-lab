@@ -104,6 +104,7 @@ fi
 if [ -z "$SSH_USER" ] ; then
     echo 'Error: Argument --ssh_user is required.'
     print_usage_and_exit
+fi
 
 if [ -z "$COUNTRY_CONFIG_VERSION" ] ; then
     echo 'Error: Argument --country_config_version is required.'
@@ -115,30 +116,30 @@ if [ -z "$REPLICAS" ] ; then
     print_usage_and_exit
 fi
 
-if [ -z "$SMTP_HOST" ] ; then
-    echo 'Error: Missing environment variable SMTP_HOST.'
-    print_usage_and_exit
-fi
+# if [ -z "$SMTP_HOST" ] ; then
+#     echo 'Error: Missing environment variable SMTP_HOST.'
+#     print_usage_and_exit
+# fi
 
-if [ -z "$SMTP_PORT" ] ; then
-    echo 'Error: Missing environment variable SMTP_PORT.'
-    print_usage_and_exit
-fi
+# if [ -z "$SMTP_PORT" ] ; then
+#     echo 'Error: Missing environment variable SMTP_PORT.'
+#     print_usage_and_exit
+# fi
 
-if [ -z "$SMTP_USERNAME" ] ; then
-    echo 'Error: Missing environment variable SMTP_USERNAME.'
-    print_usage_and_exit
-fi
+# if [ -z "$SMTP_USERNAME" ] ; then
+#     echo 'Error: Missing environment variable SMTP_USERNAME.'
+#     print_usage_and_exit
+# fi
 
-if [ -z "$SMTP_PASSWORD" ] ; then
-    echo 'Error: Missing environment variable SMTP_PASSWORD.'
-    print_usage_and_exit
-fi
+# if [ -z "$SMTP_PASSWORD" ] ; then
+#     echo 'Error: Missing environment variable SMTP_PASSWORD.'
+#     print_usage_and_exit
+# fi
 
-if [ -z "$ALERT_EMAIL" ] ; then
-    echo 'Error: Missing environment variable ALERT_EMAIL.'
-    print_usage_and_exit
-fi
+# if [ -z "$ALERT_EMAIL" ] ; then
+#     echo 'Error: Missing environment variable ALERT_EMAIL.'
+#     print_usage_and_exit
+# fi
 
 if [ -z "$KIBANA_USERNAME" ] ; then
     echo 'Error: Missing environment variable KIBANA_USERNAME.'
@@ -286,7 +287,7 @@ if [ -z "$SENDER_EMAIL_ADDRESS" ] ; then
   echo 'Info: Missing optional return sender email address environment variable SENDER_EMAIL_ADDRESS'
 fi
 
-LOG_LOCATION=${LOG_LOCATION:-/var/log}
+LOG_LOCATION=${LOG_LOCATION:-/var/log/opencrvs}
 
 (cd /tmp/ && curl -O https://raw.githubusercontent.com/opencrvs/opencrvs-core/$VERSION/docker-compose.yml)
 (cd /tmp/ && curl -O https://raw.githubusercontent.com/opencrvs/opencrvs-core/$VERSION/docker-compose.deps.yml)
@@ -372,15 +373,15 @@ rotate_authorized_keys() {
 
 # Download base docker compose files to the server
 
-sudo rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP /tmp/docker-compose* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
+rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP /tmp/docker-compose* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
 
-sudo rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP $BASEDIR/docker-compose* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
+rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP $BASEDIR/docker-compose* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
 
 # Copy all country compose files to the server
-sudo rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP $BASEDIR/docker-compose.countryconfig* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
+rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP $BASEDIR/docker-compose.countryconfig* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
 
 # Override configuration files with country specific files
-sudo rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP /tmp/opencrvs/infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs
+rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP /tmp/opencrvs/infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs
 
 # IF USING SUDO PASSWORD, YOU MAY NEED TO ADJUST COMMANDS LIKE THIS:
 # ssh $SSH_USER@$SSH_HOST "echo $SUDO_PASSWORD | sudo -S 
@@ -552,8 +553,8 @@ elif [[ "$ENV" = "qa" ]]; then
   ENVIRONMENT_COMPOSE="docker-compose.countryconfig.qa-deploy.yml docker-compose.qa-deploy.yml"
   FILES_TO_ROTATE="${FILES_TO_ROTATE} /opt/opencrvs/docker-compose.countryconfig.qa-deploy.yml /opt/opencrvs/docker-compose.qa-deploy.yml"
 elif [[ "$ENV" = "production" ]]; then
-  ENVIRONMENT_COMPOSE="docker-compose.countryconfig.prod-deploy.yml docker-compose.prod-deploy.yml"
-  FILES_TO_ROTATE="${FILES_TO_ROTATE} /opt/opencrvs/docker-compose.countryconfig.prod-deploy.yml /opt/opencrvs/docker-compose.prod-deploy.yml"
+  ENVIRONMENT_COMPOSE="docker-compose.countryconfig.prod-deploy.yml docker-compose.prod-deploy.yml docker-compose.dci.yml"
+  FILES_TO_ROTATE="${FILES_TO_ROTATE} /opt/opencrvs/docker-compose.countryconfig.prod-deploy.yml /opt/opencrvs/docker-compose.prod-deploy.yml /opt/opencrvs/docker-compose.dci.yml"
 elif [[ "$ENV" = "demo" ]]; then
   ENVIRONMENT_COMPOSE="docker-compose.countryconfig.demo-deploy.yml docker-compose.prod-deploy.yml"
   FILES_TO_ROTATE="${FILES_TO_ROTATE} /opt/opencrvs/docker-compose.countryconfig.demo-deploy.yml /opt/opencrvs/docker-compose.prod-deploy.yml"
@@ -594,11 +595,11 @@ if [ $CLEAR_DATA == "yes" ] ; then
         /opt/opencrvs/infrastructure/run-migrations.sh"
 fi
 
-echo "Setting up Kibana config & alerts"
+# echo "Setting up Kibana config & alerts"
 
-while true; do
-  if ssh $SSH_USER@$SSH_HOST "ELASTICSEARCH_SUPERUSER_PASSWORD=$ELASTICSEARCH_SUPERUSER_PASSWORD HOST=kibana$HOST /opt/opencrvs/infrastructure/monitoring/kibana/setup-config.sh"; then
-    break
-  fi
-sleep 5
-done
+# while true; do
+#   if ssh $SSH_USER@$SSH_HOST "ELASTICSEARCH_SUPERUSER_PASSWORD=$ELASTICSEARCH_SUPERUSER_PASSWORD HOST=kibana.$HOST /opt/opencrvs/infrastructure/monitoring/kibana/setup-config.sh"; then
+#     break
+#   fi
+# sleep 5
+# done

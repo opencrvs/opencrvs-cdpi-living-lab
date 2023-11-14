@@ -13,7 +13,7 @@ services:
     environment:
       - LANGUAGES=en,fr
       - SENTRY_DSN=${SENTRY_DSN}
-  
+
   countryconfig:
     image: ${DOCKERHUB_ACCOUNT}/${DOCKERHUB_REPO}:${COUNTRY_CONFIG_VERSION:-latest}
     restart: unless-stopped
@@ -28,11 +28,6 @@ services:
       - CONFIRM_REGISTRATION_URL=http://openhim-core:5001/confirm/registration
       - CHECK_INVALID_TOKEN=true
       - HOSTNAME=${HOSTNAME}
-      - EMAIL_API_KEY=${EMAIL_API_KEY}
-      - INFOBIP_GATEWAY_ENDPOINT=${INFOBIP_GATEWAY_ENDPOINT}
-      - INFOBIP_API_KEY=${INFOBIP_API_KEY}
-      - INFOBIP_SENDER_ID=${INFOBIP_SENDER_ID}
-      - SENDER_EMAIL_ADDRESS=${SENDER_EMAIL_ADDRESS}
       - SENTRY_DSN=${SENTRY_DSN}
 
     deploy:
@@ -57,19 +52,24 @@ services:
 
   auth:
     environment:
+      - QA_ENV=true
+      - NODE_ENV=production
       - SENTRY_DSN=${SENTRY_DSN}
 
   user-mgnt:
     environment:
+      - QA_ENV=true
+      - NODE_ENV=production
       - SENTRY_DSN=${SENTRY_DSN}
 
   config:
     environment:
-      - NODE_ENV=production
+      - QA_ENV=true
       - SENTRY_DSN=${SENTRY_DSN}
 
   metrics:
     environment:
+      - QA_ENV=true
       - SENTRY_DSN=${SENTRY_DSN}
 
   search:
@@ -79,4 +79,6 @@ services:
   webhooks:
     environment:
       - SENTRY_DSN=${SENTRY_DSN}
+
+
 
