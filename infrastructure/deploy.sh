@@ -287,7 +287,7 @@ if [ -z "$SENDER_EMAIL_ADDRESS" ] ; then
   echo 'Info: Missing optional return sender email address environment variable SENDER_EMAIL_ADDRESS'
 fi
 
-LOG_LOCATION=${LOG_LOCATION:-/var/log}
+LOG_LOCATION=${LOG_LOCATION:-/var/log/opencrvs}
 
 (cd /tmp/ && curl -O https://raw.githubusercontent.com/opencrvs/opencrvs-core/$VERSION/docker-compose.yml)
 (cd /tmp/ && curl -O https://raw.githubusercontent.com/opencrvs/opencrvs-core/$VERSION/docker-compose.deps.yml)
