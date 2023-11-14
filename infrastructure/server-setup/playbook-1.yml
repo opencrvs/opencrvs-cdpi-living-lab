@@ -16,7 +16,7 @@
   become_method: sudo
   tasks:
     - include_tasks:
-      file: tasks/app-group.yml
+        file: tasks/app-group.yml
         apply:
           tags:
             - app
