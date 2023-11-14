@@ -1,31 +1,26 @@
----
-- name: Configure app group and permissions
-  hosts: your_target_hosts
-  become: true
-  tasks:
-    - name: Ensure group app exists
-      ansible.builtin.group:
-        name: app
-        state: present
+- name: Ensure group app exists
+  ansible.builtin.group:
+    name: app
+    state: present
 
-    - name: Ensure user ubuntu is in group app
-      ansible.builtin.user:
-        name: ubuntu
-        groups: app
-        append: yes
+- name: Ensure user ubuntu is in group app
+  ansible.builtin.user:
+    name: ubuntu
+    groups: app
+    append: yes
 
-    - name: Ensure /opt/opencrvs directory exists
-      ansible.builtin.file:
-        path: /opt/opencrvs
-        state: directory
-        mode: '0775'
-        group: app
+- name: Ensure /opt/opencrvs directory exists
+  ansible.builtin.file:
+    path: /opt/opencrvs
+    state: directory
+    mode: '0775'
+    group: app
 
-    - name: Set permissions for /opt/opencrvs
-      ansible.builtin.acl:
-        path: /opt/opencrvs
-        entity: app
-        etype: group
-        permissions: rw
-        state: present
-        recurse: yes
+- name: Set permissions for /opt/opencrvs
+  ansible.builtin.acl:
+    path: /opt/opencrvs
+    entity: app
+    etype: group
+    permissions: rw
+    state: present
+    recurse: yes
