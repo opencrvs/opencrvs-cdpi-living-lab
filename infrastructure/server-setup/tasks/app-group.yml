@@ -29,3 +29,19 @@
     permissions: rw
     state: present
     recurse: yes
+
+- name: Set ACL for a setup-deploy-config.log
+  ansible.builtin.acl:
+    path: /var/log/setup-deploy-config.log
+    entity: app
+    etype: group
+    permissions: rw
+    state: present
+
+- name: Set ACL for a rotate-secrets.log
+  ansible.builtin.acl:
+    path: /var/log/rotate-secrets.log
+    entity: app
+    etype: group
+    permissions: rw
+    state: present
