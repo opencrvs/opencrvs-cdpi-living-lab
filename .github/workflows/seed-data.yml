@@ -48,7 +48,7 @@ jobs:
         working-directory: ./opencrvs-core
         run: yarn install
 
-      - name: Seed data on given environment
+      - name: Seed data on a given environment
         run: |
           cd ./opencrvs-core
           yarn seed:prod
