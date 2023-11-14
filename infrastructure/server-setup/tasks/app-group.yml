@@ -8,10 +8,10 @@
     name: app
     state: present
 
-- name: Ensure user ubuntu is in group app
+- name: Ensure user ubuntu is in group app and docker
   ansible.builtin.user:
     name: ubuntu
-    groups: app
+    groups: app,docker
     append: yes
 
 - name: Ensure /opt/opencrvs directory exists
