@@ -16,6 +16,9 @@ on:
         description: Branch to provision from
         default: develop
         required: true
+      app_group_only:
+        type: boolean
+        description: Only update app group details
 
 jobs:
   provision:
@@ -141,6 +144,7 @@ jobs:
             --verbose
             --inventory replicas-1.ini
             --extra-vars ""${{ steps.ansible-variables.outputs.EXTRA_VARS }}""
+            ${{ inputs.app_group_only == true && '--tags=app' || ''}}
 
       - name: Run playbook on 1 replica in production
         uses: dawidd6/action-ansible-playbook@v2
@@ -156,3 +160,4 @@ jobs:
             --verbose
             --inventory replicas-1.ini
             --extra-vars ""${{ steps.ansible-production-variables.outputs.EXTRA_VARS }}""
+            ${{ inputs.app_group_only == true && '--tags=app' || ''}}
