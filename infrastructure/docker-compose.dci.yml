@@ -2,14 +2,14 @@ version: '3.3'
 
 services:
   dci-crvs-api:
-    image: opencrvs/dci-crvs-api:7409b3d
+    image: opencrvs/dci-crvs-api:7ebca9b
     environment:
       - OPENCRVS_AUTH_URL=http://auth:4040
       - OPENCRVS_GATEWAY_URL=http://gateway:7070/graphql
     deploy:
       labels:
         - 'traefik.enable=true'
-        - 'traefik.http.routers.dci.rule=Host(`dci.farajaland-staging.opencrvs.org`)'
+        - 'traefik.http.routers.dci.rule=Host(`dci.cdpi-living-labs.opencrvs.org`)'
         - 'traefik.http.services.dci.loadbalancer.server.port=1660'
         - 'traefik.http.routers.dci.tls=true'
         - 'traefik.http.routers.dci.tls.certresolver=certResolver'
