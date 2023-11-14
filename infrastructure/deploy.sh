@@ -595,11 +595,11 @@ if [ $CLEAR_DATA == "yes" ] ; then
         /opt/opencrvs/infrastructure/run-migrations.sh"
 fi
 
-echo "Setting up Kibana config & alerts"
+# echo "Setting up Kibana config & alerts"
 
-while true; do
-  if ssh $SSH_USER@$SSH_HOST "ELASTICSEARCH_SUPERUSER_PASSWORD=$ELASTICSEARCH_SUPERUSER_PASSWORD HOST=kibana$HOST /opt/opencrvs/infrastructure/monitoring/kibana/setup-config.sh"; then
-    break
-  fi
-sleep 5
-done
+# while true; do
+#   if ssh $SSH_USER@$SSH_HOST "ELASTICSEARCH_SUPERUSER_PASSWORD=$ELASTICSEARCH_SUPERUSER_PASSWORD HOST=kibana.$HOST /opt/opencrvs/infrastructure/monitoring/kibana/setup-config.sh"; then
+#     break
+#   fi
+# sleep 5
+# done
