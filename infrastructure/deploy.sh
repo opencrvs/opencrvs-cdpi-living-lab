@@ -373,15 +373,15 @@ rotate_authorized_keys() {
 
 # Download base docker compose files to the server
 
-sudo rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP /tmp/docker-compose* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
+rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP /tmp/docker-compose* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
 
-sudo rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP $BASEDIR/docker-compose* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
+rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP $BASEDIR/docker-compose* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
 
 # Copy all country compose files to the server
-sudo rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP $BASEDIR/docker-compose.countryconfig* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
+rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP $BASEDIR/docker-compose.countryconfig* infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs/
 
 # Override configuration files with country specific files
-sudo rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP /tmp/opencrvs/infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs
+rsync -e 'ssh -o UserKnownHostsFile=/tmp/known_hosts -i /tmp/private_key_tmp' -rP /tmp/opencrvs/infrastructure $SSH_USER@$SSH_HOST:/opt/opencrvs
 
 # IF USING SUDO PASSWORD, YOU MAY NEED TO ADJUST COMMANDS LIKE THIS:
 # ssh $SSH_USER@$SSH_HOST "echo $SUDO_PASSWORD | sudo -S 
