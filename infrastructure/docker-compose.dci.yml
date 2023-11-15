@@ -6,7 +6,7 @@ services:
     environment:
       - OPENCRVS_AUTH_URL=http://auth:4040
       - OPENCRVS_GATEWAY_URL=http://gateway:7070/graphql
-      - OPENCRVS_FHIR_LOCATION_API=http://gateway:7070/location?_count=0
+      - OPENCRVS_FHIR_LOCATION_API=http://gateway:7070/location?_count=0&type=ADMIN_STRUCTURE
     deploy:
       labels:
         - 'traefik.enable=true'
