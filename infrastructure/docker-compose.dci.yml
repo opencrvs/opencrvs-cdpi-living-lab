@@ -10,7 +10,7 @@ services:
     deploy:
       labels:
         - 'traefik.enable=true'
-        - 'traefik.http.routers.dci.rule=Host(`dci.cdpi-living-labs.opencrvs.org`)'
+        - 'traefik.http.routers.dci.rule=Host(`dci.opencrvs.lab.cdpi.dev`)'
         - 'traefik.http.services.dci.loadbalancer.server.port=1660'
         - 'traefik.http.routers.dci.tls=true'
         - 'traefik.http.routers.dci.tls.certresolver=certResolver'
