@@ -2,7 +2,7 @@ version: '3.3'
 
 services:
   dci-crvs-api:
-    image: opencrvs/dci-crvs-api:c2b67f5
+    image: opencrvs/dci-crvs-api:b21d5d5
     environment:
       - OPENCRVS_AUTH_URL=http://auth:4040
       - OPENCRVS_GATEWAY_URL=http://gateway:7070/graphql
